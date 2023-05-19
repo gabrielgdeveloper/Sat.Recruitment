@@ -5,7 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
+using Sat.Recruitment.Api.Controllers;
+using Sat.Recruitment.Api.Model;
+using Sat.Recruitment.Api.Repositories;
+using Sat.Recruitment.Api.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +29,9 @@ namespace Sat.Recruitment.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddTransient<UsersController>();
+            services.AddSingleton<IRepository<User>, UserRepository>();
+            services.AddSingleton<IUserService, UserService>();
             services.AddSwaggerGen();
         }
 
