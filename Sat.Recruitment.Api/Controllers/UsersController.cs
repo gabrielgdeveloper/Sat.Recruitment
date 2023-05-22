@@ -20,10 +20,13 @@ namespace Sat.Recruitment.Api.Controllers
     [Route("api/[controller]")]
     public partial class UsersController : ControllerBase
     {
+        private readonly ILogger<UsersController> _logger;
         private readonly IUserService _userService;
-        public UsersController(IUserService userService)
+   
+        public UsersController(ILogger<UsersController> logger, IUserService userService)
         {
             _userService = userService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -39,6 +42,7 @@ namespace Sat.Recruitment.Api.Controllers
             var user = _userService.GetById(id);
             if (user == null)
             {
+                _logger.LogInformation($"User with {id} not found.");
                 return NotFound();
             }
             return Ok(user);
@@ -49,6 +53,7 @@ namespace Sat.Recruitment.Api.Controllers
         {
             if (user == null)
             {
+                _logger.LogInformation($"Missing user to add.");
                 return BadRequest();
             }
 
@@ -62,12 +67,14 @@ namespace Sat.Recruitment.Api.Controllers
         {
             if (user == null)
             {
+                _logger.LogInformation($"Missing user to update.");
                 return BadRequest();
             }
 
             var existingUSer = _userService.GetById(id);
             if (existingUSer == null)
             {
+                _logger.LogInformation($"User with {id} not found, could not be updated.");
                 return NotFound();
             }
 
@@ -83,6 +90,7 @@ namespace Sat.Recruitment.Api.Controllers
             var user = _userService.GetById(id);
             if (user == null)
             {
+                _logger.LogInformation($"Missing user to delete.");
                 return NotFound();
             }
 

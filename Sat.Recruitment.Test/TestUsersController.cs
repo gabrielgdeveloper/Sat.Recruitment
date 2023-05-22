@@ -55,8 +55,10 @@ namespace Sat.Recruitment.Test
         public void TestGetByIdMethod()
         {
             // Arrange
+            var users = GenerateUsers();
+            _userRepositoryMock.Setup(repo => repo.GetAll()).Returns(users);
             var _userServiceMock = new UserService(_userRepositoryMock.Object);
-            var currentUser = GenerateUsers().First();
+            var currentUser = users.First();
             _userRepositoryMock.Setup(repo => repo.GetById(currentUser.Id)).Returns(currentUser);
 
             // Act

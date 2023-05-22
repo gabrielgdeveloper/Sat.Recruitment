@@ -1,4 +1,5 @@
-﻿using Sat.Recruitment.Api.Model;
+﻿using Microsoft.Extensions.Logging;
+using Sat.Recruitment.Api.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,10 +9,13 @@ namespace Sat.Recruitment.Api.Repositories
 {
     public class UserRepository : IRepository<User>
     {
-        private string _filePath;
-        public UserRepository()
+        private readonly ILogger<UserRepository> _logger;
+        private readonly string _filePath;
+
+        public UserRepository(ILogger<UserRepository> logger)
         {
-            _filePath = Directory.GetCurrentDirectory() + "/Files/Users.txt"; ;
+            _filePath = Directory.GetCurrentDirectory() + "/Files/Users.txt";
+            _logger = logger;
         }
         public void Add(User user)
         {
@@ -49,36 +53,50 @@ namespace Sat.Recruitment.Api.Repositories
             return GetAll().FirstOrDefault(u => u.Id == id);
         }
 
-        public void Remove(User currentUser)
+        public void Remove(User user)
         {
-            var users = GetAll().ToList();
-            if (currentUser != null)
+            try
             {
-                var index = users.FindIndex(u => u.Id == currentUser.Id);
-                users.RemoveAt(index);
-                SaveUsers(users);
+                var users = GetAll().ToList();
+                if (user != null)
+                {
+                    var index = users.FindIndex(u => u.Id == user.Id);
+                    users.RemoveAt(index);
+                    SaveUsers(users);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error trying to delete user with id: {user.Id}");
             }
         }
 
         public void Update(User user)
         {
-            var currentUser = GetById(user.Id);
-            if (currentUser != null)
+            try
             {
-                currentUser.Name = user.Name;
-                currentUser.Email = user.Email;
-                currentUser.Address = user.Address;
-                currentUser.Phone = user.Phone;
-                currentUser.UserType = user.UserType;
-                currentUser.Money = user.Money;
+                var currentUser = GetById(user.Id);
+                if (currentUser != null)
+                {
+                    currentUser.Name = user.Name;
+                    currentUser.Email = user.Email;
+                    currentUser.Address = user.Address;
+                    currentUser.Phone = user.Phone;
+                    currentUser.UserType = user.UserType;
+                    currentUser.Money = user.Money;
+                }
+
+                var users = GetAll().ToList();
+                var index = users.FindIndex(u => u.Id == user.Id);
+                if (index != -1)
+                    users[index] = user;
+
+                SaveUsers(users);
             }
-
-            var users = GetAll().ToList();
-            var index = users.FindIndex(u => u.Id == user.Id);
-            if (index != -1)
-                users[index] = user;
-
-            SaveUsers(users);
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error trying to user with id: {user.Id}");
+            }
         }
 
         private int GenerateValidId()
